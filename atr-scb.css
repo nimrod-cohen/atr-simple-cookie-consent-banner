@@ -25,17 +25,21 @@
 }
 
 #scb-banner {
+  --scb-bg: #ffffff;
+  --scb-fg: #222222;
+  --scb-primary: #0b74de;
+  --scb-primary-hover: color-mix(in srgb, var(--scb-primary) 80%, black);
   position: fixed;
   right: 20px;
   bottom: 20px;
   max-width: 420px;
-  background: #fff;
+  background: var(--scb-bg);
   border-radius: 8px;
   box-shadow: 0 8px 24px rgba(0,0,0,0.15);
   z-index: 9999;
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
   padding: 16px;
-  color: #222;
+  color: var(--scb-fg);
   opacity: 0;
   visibility: hidden;
   transform: translateY(20px);
@@ -90,14 +94,14 @@
   border-color: #999;
 }
 
-.scb-btn-primary { 
-  background: #0b74de; 
-  color: #fff; 
-  border-color: transparent; 
+.scb-btn-primary {
+  background: var(--scb-primary);
+  color: #fff;
+  border-color: transparent;
 }
 
 .scb-btn-primary:hover {
-  background: #0956a8;
+  background: var(--scb-primary-hover);
 }
 
 .scb-settings { 

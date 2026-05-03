@@ -3,7 +3,7 @@
  * Plugin Name: ATR Simple Cookie Consent Banner for Israeli web sites
  * Description: Cookie consent banner specifically designed for Israeli websites to comply with the 13th amendment of the Privacy Protection Law (תיקון 13 לחוק הגנת הפרטיות). Handles Essential, Analytics, and Marketing cookies with proper consent management. Suitable for all Israeli businesses and websites. Use at your own risk - no warranty or liability for damages.
  * Plugin URI:        https://github.com/nimrod-cohen/atr-simple-cookie-consent-banner
- * Version:           1.0.2
+ * Version:           1.0.3
  * Author:            nimrod-cohen
  * Author URI:        https://github.com/nimrod-cohen
  * Original Author:   Yehuda Tiram (https://atarimtr.co.il/)
@@ -22,6 +22,24 @@ add_action('init', function () {
   }
 });
 
+function scb_get_colors() {
+  return [
+    'primary' => get_option('scb_color_primary', '#0b74de'),
+    'bg' => get_option('scb_color_bg', '#ffffff'),
+    'fg' => get_option('scb_color_fg', '#222222'),
+  ];
+}
+
+function scb_color_inline_css() {
+  $c = scb_get_colors();
+  return sprintf(
+    '#scb-banner{--scb-primary:%s;--scb-bg:%s;--scb-fg:%s;}',
+    esc_attr($c['primary']),
+    esc_attr($c['bg']),
+    esc_attr($c['fg'])
+  );
+}
+
 /* --- enqueue assets --- */
 add_action('wp_enqueue_scripts', function () {
   $excluded_slugs = get_option('scb_excluded_pages', []);
@@ -30,10 +48,11 @@ add_action('wp_enqueue_scripts', function () {
     return;
   }
 
-  wp_register_style('scb-style', plugins_url('atr-scb.css', __FILE__), [], '1.0.1');
-  wp_register_script('scb-script', plugins_url('atr-scb.js', __FILE__), [], '1.0.1', true);
+  wp_register_style('scb-style', plugins_url('atr-scb.css', __FILE__), [], '1.0.3');
+  wp_register_script('scb-script', plugins_url('atr-scb.js', __FILE__), [], '1.0.3', true);
 
   wp_enqueue_style('scb-style');
+  wp_add_inline_style('scb-style', scb_color_inline_css());
   wp_enqueue_script('scb-script');
 
   // Check if we're on the privacy policy page
@@ -182,11 +201,16 @@ function scb_render_settings_page() {
     $selected = isset($_POST['scb_excluded_pages']) ? array_map('sanitize_text_field', $_POST['scb_excluded_pages']) : [];
     update_option('scb_excluded_pages', $selected);
     update_option('scb_require_answer', !empty($_POST['scb_require_answer']) ? 1 : 0);
+    foreach (['primary', 'bg', 'fg'] as $k) {
+      $v = isset($_POST['scb_color_' . $k]) ? sanitize_hex_color($_POST['scb_color_' . $k]) : null;
+      if ($v) update_option('scb_color_' . $k, $v);
+    }
     echo '<div class="notice notice-success is-dismissible"><p>Settings saved.</p></div>';
   }
 
   $excluded = get_option('scb_excluded_pages', []);
   $require_answer = (bool) get_option('scb_require_answer', false);
+  $colors = scb_get_colors();
   $pages = get_pages(['sort_column' => 'post_title', 'sort_order' => 'ASC']);
 
   // Group pages by parent
@@ -214,11 +238,21 @@ function scb_render_settings_page() {
     .scb-page-item:last-child { border-bottom: none; }
     .scb-page-item:hover { background: #f7f9fc; }
     .scb-page-item.checked { background: #eef4fb; }
-    .scb-page-item input[type=checkbox] { width: 18px; height: 18px; margin: 0 10px 0 0; flex-shrink: 0; accent-color: #2271b1; cursor: pointer; }
-    .scb-page-item .scb-title { flex: 1; font-size: 13.5px; color: #1d2327; }
-    .scb-page-item .scb-slug { color: #a0a5aa; font-size: 12px; font-family: 'SF Mono', Consolas, monospace; direction: ltr; max-width: 50%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .scb-page-item.child { padding-left: 36px; }
+    .scb-page-item input[type=checkbox] { width: 18px; height: 18px; margin: 0; margin-inline-end: 10px; flex-shrink: 0; accent-color: #2271b1; cursor: pointer; }
+    .scb-page-item .scb-title { flex: 1; font-size: 13.5px; color: #1d2327; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .scb-page-item .scb-slug { color: #a0a5aa; font-size: 12px; font-family: 'SF Mono', Consolas, monospace; direction: ltr; unicode-bidi: isolate; max-width: 50%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-inline-start: 8px; flex-shrink: 0; }
+    .scb-page-item.child { padding-inline-start: 36px; }
     .scb-page-item.child .scb-title::before { content: '↳ '; color: #c3c4c7; }
+    .scb-color-grid { display: grid; grid-template-columns: repeat(3, minmax(140px, 1fr)); gap: 16px; margin-bottom: 18px; }
+    .scb-color-grid label { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: #1d2327; }
+    .scb-color-grid input[type=color] { width: 100%; height: 38px; border: 1px solid #ddd; border-radius: 6px; padding: 2px; cursor: pointer; background: #fff; }
+    .scb-preview-stage { background: linear-gradient(135deg, #f3f4f6, #e5e7eb); border: 1px dashed #cbd0d4; border-radius: 8px; padding: 24px; min-height: 220px; display: flex; align-items: flex-end; justify-content: flex-end; }
+    .scb-preview-banner { --scb-bg: <?= esc_attr($colors['bg']) ?>; --scb-fg: <?= esc_attr($colors['fg']) ?>; --scb-primary: <?= esc_attr($colors['primary']) ?>; --scb-primary-hover: color-mix(in srgb, var(--scb-primary) 80%, black); background: var(--scb-bg); color: var(--scb-fg); border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); padding: 16px; max-width: 360px; font-family: system-ui, -apple-system, sans-serif; }
+    .scb-preview-banner .scb-pv-text { font-size: 13px; line-height: 1.4; margin-bottom: 12px; }
+    .scb-preview-banner .scb-pv-text strong { display: block; margin-bottom: 4px; }
+    .scb-preview-banner .scb-pv-controls { display: flex; gap: 8px; flex-wrap: wrap; }
+    .scb-preview-banner .scb-pv-btn { padding: 8px 12px; border-radius: 6px; border: 1px solid #ccc; background: #f7f7f7; color: var(--scb-fg); font-size: 12px; cursor: default; }
+    .scb-preview-banner .scb-pv-btn.primary { background: var(--scb-primary); color: #fff; border-color: transparent; }
     .scb-selected-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; min-height: 32px; }
     .scb-tag { display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(135deg, #2271b1, #135e96); color: #fff; border-radius: 16px; padding: 5px 14px; font-size: 12.5px; font-weight: 500; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
     .scb-tag .remove { cursor: pointer; opacity: 0.7; font-size: 15px; line-height: 1; transition: opacity 0.15s; }
@@ -308,6 +342,35 @@ function scb_render_settings_page() {
         </label>
       </div>
 
+      <div class="scb-card">
+        <h2>Colors</h2>
+        <p>Match the banner to your theme. Changes are previewed live below; save to apply.</p>
+        <div class="scb-color-grid">
+          <label>Primary button
+            <input type="color" id="scb-color-primary" name="scb_color_primary" value="<?= esc_attr($colors['primary']) ?>">
+          </label>
+          <label>Background
+            <input type="color" id="scb-color-bg" name="scb_color_bg" value="<?= esc_attr($colors['bg']) ?>">
+          </label>
+          <label>Font color
+            <input type="color" id="scb-color-fg" name="scb_color_fg" value="<?= esc_attr($colors['fg']) ?>">
+          </label>
+        </div>
+        <div class="scb-preview-stage" dir="rtl">
+          <div class="scb-preview-banner" id="scb-preview">
+            <div class="scb-pv-text">
+              <strong><?= esc_html(get_bloginfo('name')); ?></strong>
+              משתמשים בעוגיות כדי להבטיח תפקוד האתר ולשפר את חוויית המשתמש.
+            </div>
+            <div class="scb-pv-controls">
+              <span class="scb-pv-btn primary">קבל הכל</span>
+              <span class="scb-pv-btn">הסר לא הכרחיות</span>
+              <span class="scb-pv-btn">העדפות</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <p class="scb-submit"><button type="submit" name="scb_save_excluded" class="button button-primary">Save Changes</button></p>
     </form>
   </div>
@@ -358,6 +421,21 @@ function scb_render_settings_page() {
       document.getElementById('scb-count').textContent = document.querySelectorAll('.scb-page-item.checked').length;
     }
   }
+
+  (function(){
+    var preview = document.getElementById('scb-preview');
+    if (!preview) return;
+    var bind = function(id, varName) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      el.addEventListener('input', function() {
+        preview.style.setProperty(varName, el.value);
+      });
+    };
+    bind('scb-color-primary', '--scb-primary');
+    bind('scb-color-bg', '--scb-bg');
+    bind('scb-color-fg', '--scb-fg');
+  })();
   </script>
   <?php
 }
