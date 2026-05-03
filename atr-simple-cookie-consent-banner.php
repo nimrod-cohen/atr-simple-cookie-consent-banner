@@ -3,7 +3,7 @@
  * Plugin Name: ATR Simple Cookie Consent Banner for Israeli web sites
  * Description: Cookie consent banner specifically designed for Israeli websites to comply with the 13th amendment of the Privacy Protection Law (תיקון 13 לחוק הגנת הפרטיות). Handles Essential, Analytics, and Marketing cookies with proper consent management. Suitable for all Israeli businesses and websites. Use at your own risk - no warranty or liability for damages.
  * Plugin URI:        https://github.com/nimrod-cohen/atr-simple-cookie-consent-banner
- * Version:           1.0.3
+ * Version:           1.0.4
  * Author:            nimrod-cohen
  * Author URI:        https://github.com/nimrod-cohen
  * Original Author:   Yehuda Tiram (https://atarimtr.co.il/)
@@ -243,9 +243,10 @@ function scb_render_settings_page() {
     .scb-page-item .scb-slug { color: #a0a5aa; font-size: 12px; font-family: 'SF Mono', Consolas, monospace; direction: ltr; unicode-bidi: isolate; max-width: 50%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-inline-start: 8px; flex-shrink: 0; }
     .scb-page-item.child { padding-inline-start: 36px; }
     .scb-page-item.child .scb-title::before { content: '↳ '; color: #c3c4c7; }
-    .scb-color-grid { display: grid; grid-template-columns: repeat(3, minmax(140px, 1fr)); gap: 16px; margin-bottom: 18px; }
+    .scb-colors-layout { display: grid; grid-template-columns: max-content 1fr; gap: 24px; align-items: start; }
+    .scb-color-grid { display: flex; flex-direction: column; gap: 12px; }
     .scb-color-grid label { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: #1d2327; }
-    .scb-color-grid input[type=color] { width: 100%; height: 38px; border: 1px solid #ddd; border-radius: 6px; padding: 2px; cursor: pointer; background: #fff; }
+    .scb-color-grid input[type=color] { width: 180px; height: 38px; border: 1px solid #ddd; border-radius: 6px; padding: 2px; cursor: pointer; background: #fff; }
     .scb-preview-stage { background: linear-gradient(135deg, #f3f4f6, #e5e7eb); border: 1px dashed #cbd0d4; border-radius: 8px; padding: 24px; min-height: 220px; display: flex; align-items: flex-end; justify-content: flex-end; }
     .scb-preview-banner { --scb-bg: <?= esc_attr($colors['bg']) ?>; --scb-fg: <?= esc_attr($colors['fg']) ?>; --scb-primary: <?= esc_attr($colors['primary']) ?>; --scb-primary-hover: color-mix(in srgb, var(--scb-primary) 80%, black); background: var(--scb-bg); color: var(--scb-fg); border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); padding: 16px; max-width: 360px; font-family: system-ui, -apple-system, sans-serif; }
     .scb-preview-banner .scb-pv-text { font-size: 13px; line-height: 1.4; margin-bottom: 12px; }
@@ -345,18 +346,19 @@ function scb_render_settings_page() {
       <div class="scb-card">
         <h2>Colors</h2>
         <p>Match the banner to your theme. Changes are previewed live below; save to apply.</p>
-        <div class="scb-color-grid">
-          <label>Primary button
-            <input type="color" id="scb-color-primary" name="scb_color_primary" value="<?= esc_attr($colors['primary']) ?>">
-          </label>
-          <label>Background
-            <input type="color" id="scb-color-bg" name="scb_color_bg" value="<?= esc_attr($colors['bg']) ?>">
-          </label>
-          <label>Font color
-            <input type="color" id="scb-color-fg" name="scb_color_fg" value="<?= esc_attr($colors['fg']) ?>">
-          </label>
-        </div>
-        <div class="scb-preview-stage" dir="rtl">
+        <div class="scb-colors-layout">
+          <div class="scb-color-grid">
+            <label>Primary button
+              <input type="color" id="scb-color-primary" name="scb_color_primary" value="<?= esc_attr($colors['primary']) ?>">
+            </label>
+            <label>Background
+              <input type="color" id="scb-color-bg" name="scb_color_bg" value="<?= esc_attr($colors['bg']) ?>">
+            </label>
+            <label>Font color
+              <input type="color" id="scb-color-fg" name="scb_color_fg" value="<?= esc_attr($colors['fg']) ?>">
+            </label>
+          </div>
+          <div class="scb-preview-stage" dir="rtl">
           <div class="scb-preview-banner" id="scb-preview">
             <div class="scb-pv-text">
               <strong><?= esc_html(get_bloginfo('name')); ?></strong>
@@ -367,6 +369,7 @@ function scb_render_settings_page() {
               <span class="scb-pv-btn">הסר לא הכרחיות</span>
               <span class="scb-pv-btn">העדפות</span>
             </div>
+          </div>
           </div>
         </div>
       </div>
