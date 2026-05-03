@@ -3,7 +3,7 @@
  * Plugin Name: ATR Simple Cookie Consent Banner for Israeli web sites
  * Description: Cookie consent banner specifically designed for Israeli websites to comply with the 13th amendment of the Privacy Protection Law (תיקון 13 לחוק הגנת הפרטיות). Handles Essential, Analytics, and Marketing cookies with proper consent management. Suitable for all Israeli businesses and websites. Use at your own risk - no warranty or liability for damages.
  * Plugin URI:        https://github.com/nimrod-cohen/atr-simple-cookie-consent-banner
- * Version:           1.0.4
+ * Version:           1.0.5
  * Author:            nimrod-cohen
  * Author URI:        https://github.com/nimrod-cohen
  * Original Author:   Yehuda Tiram (https://atarimtr.co.il/)
@@ -21,6 +21,15 @@ add_action('init', function () {
     new \ATRCookieConsent\GitHubPluginUpdater(__FILE__);
   }
 });
+
+function scb_default_banner_text() {
+  return 'משתמשים בעוגיות כדי להבטיח תפקוד האתר ולשפר את חוויית המשתמש. אפשר לבחור אילו סוגי עוגיות להפעיל.';
+}
+
+function scb_get_banner_text() {
+  $t = get_option('scb_banner_text', '');
+  return $t !== '' ? $t : scb_default_banner_text();
+}
 
 function scb_get_colors() {
   return [
@@ -88,7 +97,7 @@ add_action('wp_footer', function () {
     <div class="scb-content">
       <div class="scb-text">
         <strong><?php echo esc_html(get_bloginfo('name')); ?></strong>
-        משתמשים בעוגיות כדי להבטיח תפקוד האתר ולשפר את חוויית המשתמש. אפשר לבחור אילו סוגי עוגיות להפעיל.
+        <?php echo esc_html(scb_get_banner_text()); ?>
       </div>
 
       <div class="scb-controls">
@@ -205,12 +214,16 @@ function scb_render_settings_page() {
       $v = isset($_POST['scb_color_' . $k]) ? sanitize_hex_color($_POST['scb_color_' . $k]) : null;
       if ($v) update_option('scb_color_' . $k, $v);
     }
+    if (isset($_POST['scb_banner_text'])) {
+      update_option('scb_banner_text', sanitize_textarea_field(wp_unslash($_POST['scb_banner_text'])));
+    }
     echo '<div class="notice notice-success is-dismissible"><p>Settings saved.</p></div>';
   }
 
   $excluded = get_option('scb_excluded_pages', []);
   $require_answer = (bool) get_option('scb_require_answer', false);
   $colors = scb_get_colors();
+  $banner_text = scb_get_banner_text();
   $pages = get_pages(['sort_column' => 'post_title', 'sort_order' => 'ASC']);
 
   // Group pages by parent
@@ -344,6 +357,12 @@ function scb_render_settings_page() {
       </div>
 
       <div class="scb-card">
+        <h2>Banner Text</h2>
+        <p>The message shown to visitors. The site name above it stays as <code><?= esc_html(get_bloginfo('name')) ?></code>.</p>
+        <textarea name="scb_banner_text" id="scb-banner-text" rows="3" style="width:100%;max-width:720px;font-size:14px;line-height:1.5;direction:rtl;padding:10px;border:1px solid #ddd;border-radius:6px;"><?= esc_textarea($banner_text) ?></textarea>
+      </div>
+
+      <div class="scb-card">
         <h2>Colors</h2>
         <p>Match the banner to your theme. Changes are previewed live below; save to apply.</p>
         <div class="scb-colors-layout">
@@ -362,7 +381,7 @@ function scb_render_settings_page() {
           <div class="scb-preview-banner" id="scb-preview">
             <div class="scb-pv-text">
               <strong><?= esc_html(get_bloginfo('name')); ?></strong>
-              משתמשים בעוגיות כדי להבטיח תפקוד האתר ולשפר את חוויית המשתמש.
+              <span id="scb-preview-text"><?= esc_html($banner_text) ?></span>
             </div>
             <div class="scb-pv-controls">
               <span class="scb-pv-btn primary">קבל הכל</span>
@@ -438,6 +457,14 @@ function scb_render_settings_page() {
     bind('scb-color-primary', '--scb-primary');
     bind('scb-color-bg', '--scb-bg');
     bind('scb-color-fg', '--scb-fg');
+
+    var ta = document.getElementById('scb-banner-text');
+    var pvText = document.getElementById('scb-preview-text');
+    if (ta && pvText) {
+      ta.addEventListener('input', function() {
+        pvText.textContent = ta.value;
+      });
+    }
   })();
   </script>
   <?php
