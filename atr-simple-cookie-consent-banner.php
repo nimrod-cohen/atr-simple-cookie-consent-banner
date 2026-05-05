@@ -3,7 +3,7 @@
  * Plugin Name: ATR Simple Cookie Consent Banner for Israeli web sites
  * Description: Cookie consent banner specifically designed for Israeli websites to comply with the 13th amendment of the Privacy Protection Law (תיקון 13 לחוק הגנת הפרטיות). Handles Essential, Analytics, and Marketing cookies with proper consent management. Suitable for all Israeli businesses and websites. Use at your own risk - no warranty or liability for damages.
  * Plugin URI:        https://github.com/nimrod-cohen/atr-simple-cookie-consent-banner
- * Version:           1.0.6
+ * Version:           1.0.7
  * Author:            nimrod-cohen
  * Author URI:        https://github.com/nimrod-cohen
  * Original Author:   Yehuda Tiram (https://atarimtr.co.il/)

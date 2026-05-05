@@ -84,14 +84,19 @@
    color/background/border/border-radius on `button` (seen on irelandisrael
    where the theme made secondary buttons white-on-white). */
 .scb-btn {
-  padding: 8px 12px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 8px 14px !important;
+  min-height: 36px !important;
   border-radius: 6px !important;
   border: 1px solid #ccc !important;
   background: #f7f7f7 !important;
   color: #222 !important;
-  font: inherit !important;
+  font-family: inherit !important;
   font-size: 14px !important;
-  line-height: 1.4 !important;
+  font-weight: 500 !important;
+  line-height: 1.2 !important;
   text-transform: none !important;
   letter-spacing: normal !important;
   cursor: pointer !important;
@@ -102,6 +107,21 @@
   width: auto !important;
   height: auto !important;
   box-shadow: none !important;
+}
+
+/* Inner spans (.scb-btn-text wraps the label on Accept/Reject; absent on
+   Preferences). Themes sometimes target span inside button — lock its
+   typography so the three buttons render at identical size. */
+.scb-btn > span,
+.scb-btn .scb-btn-text,
+.scb-btn .scb-btn-loading {
+  font-size: inherit !important;
+  font-weight: inherit !important;
+  line-height: inherit !important;
+  color: inherit !important;
+  letter-spacing: inherit !important;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
 .scb-btn:hover {
@@ -129,9 +149,21 @@
   margin-top: 6px; 
 }
 
-.scb-more { 
-  font-size: 12px; 
-  color: #666; 
+.scb-more {
+  font-size: 12px !important;
+  line-height: 1.4 !important;
+  color: #666 !important;
+  margin: 0 !important;
+}
+
+.scb-more a,
+.scb-more a:visited,
+.scb-more a:hover,
+.scb-more a:focus {
+  font-size: inherit !important;
+  color: inherit !important;
+  text-decoration: underline !important;
+  background: transparent !important;
 }
 
 .scb-actions { 
